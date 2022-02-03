@@ -36,7 +36,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="page">
      <widget class="QLabel" name="label">
@@ -150,7 +150,7 @@
        <string notr="true">font: 75 12pt &quot;Terminal&quot;;</string>
       </property>
       <property name="text">
-       <string>BRASS BALLS</string>
+       <string>BALLS TO THE WALL</string>
       </property>
      </widget>
      <widget class="QPushButton" name="pushButton_9">
@@ -166,7 +166,7 @@
        <string notr="true">font: 75 12pt &quot;Terminal&quot;;</string>
       </property>
       <property name="text">
-       <string>BALLS TO THE WALL</string>
+       <string>BALLS OF STEEL</string>
       </property>
      </widget>
      <widget class="QPushButton" name="pushButton_10">
