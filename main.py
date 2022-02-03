@@ -29,6 +29,11 @@ def load_image(name, color_key=None):
     return image
 
 
+# устанавливаем иконку (логотип)
+# icon = load_image('red_ball.png')
+# pygame.display.set_icon(icon)
+
+
 # TODO класс шарика
 class Ball(pygame.sprite.Sprite):
 
@@ -43,7 +48,8 @@ class Ball(pygame.sprite.Sprite):
         purple_ball = pygame.transform.scale(load_image("purple_ball.png"), (radius, radius))
         white_ball = pygame.transform.scale(load_image("white_ball.png"), (radius, radius))
         yellow_ball = pygame.transform.scale(load_image("yellow_ball.png"), (radius, radius))
-        s = [red_ball, blue_ball, darkblue_ball, green_ball, orange_ball, pink_ball, purple_ball, white_ball, yellow_ball]
+        s = [red_ball, blue_ball, darkblue_ball, green_ball, orange_ball, pink_ball, purple_ball, white_ball,
+             yellow_ball]
         super().__init__(group)
         ds = choice(s)
         self.image = ds
@@ -51,7 +57,7 @@ class Ball(pygame.sprite.Sprite):
         # pygame.SRCALPHA, 32)
         # pygame.draw.circle(self.image, pygame.Color((randint(0, 255), randint(0, 255), randint(0, 255))),
         # (radius, radius), radius)
-        self.rect = pygame.Rect(x, y, 2 * radius, 2 * radius)
+        self.rect = pygame.Rect(x, y, radius, radius)
         self.vx = randint(-13, 13)
         self.vy = randint(-13, 13)
         while self.vx == 0:
@@ -91,7 +97,6 @@ class Border(pygame.sprite.Sprite):
 # группа, содержащая все спрайты
 all_sprites = pygame.sprite.Group()
 
-
 # создаём границы
 Border(5, 5, width - 5, 5)
 Border(5, height - 5, width - 5, height - 5)
@@ -100,7 +105,7 @@ Border(width - 5, 5, width - 5, height - 5)
 
 # создаём шары
 for i in range(50):
-    Ball(all_sprites, randint(30, 70), randint(0, 1400), randint(0, 900))
+    Ball(all_sprites, randint(30, 70), randint(100, 1300), randint(100, 800))
 print(all_sprites)
 
 running = True
