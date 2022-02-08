@@ -49,8 +49,8 @@ def display_time(time_s):
 
 
 # устанавливаем иконку (логотип)
-# icon = load_image('red_ball.png')
-# pygame.display.set_icon(icon)
+icon = pygame.image.load('data\\logo_1.png')
+pygame.display.set_icon(icon)
 
 
 # TODO класс шарика
@@ -128,7 +128,7 @@ Border(width - 5, 5, width - 5, height - 5)
 
 # создаём шары
 for i in range(50):
-    Ball(all_sprites, randint(30, 70), randint(100, 1300), randint(100, 800))
+    Ball(all_sprites, randint(30, 80), randint(100, 1300), randint(100, 800))
 print(all_sprites)
 
 running = True
