@@ -3,10 +3,12 @@ import os
 import pygame
 from random import randint, choice
 
+# устанавливаем название окну
 pygame.display.set_caption('Insanity balls')  # название
+# задём ширину и высоту
+SIZE = WIDTH, HEIGHT = 1400, 900
 # устанавливаем размер окна
-size = width, height = 1400, 900
-screen = pygame.display.set_mode(size)
+screen = pygame.display.set_mode(SIZE)
 # Используется для управления fps
 clock = pygame.time.Clock()
 
@@ -42,15 +44,19 @@ time_seconds = 0
 # TODO функция секундомера
 def display_time(time_s):
     # временная строка с десятыми долями секунды
+    # устанавливаем шрифт
     font = pygame.font.Font(None, 30)
     time_str = str(int(time_s * 10) / 10)
+    # строка секундомера
     label = font.render(f"Time : {time_str}", True, 'red')
+    # отрисовываем на экране секундомер в координатах (20, 20)
     screen.blit(label, (20, 20))
 
 
+# импортируем картинку логотипа из папки data
+ICON = pygame.image.load('data\\logo_1.png')
 # устанавливаем иконку (логотип)
-icon = pygame.image.load('data\\logo_1.png')
-pygame.display.set_icon(icon)
+pygame.display.set_icon(ICON)
 
 
 # TODO класс шарика
@@ -121,10 +127,10 @@ class Border(pygame.sprite.Sprite):
 all_sprites = pygame.sprite.Group()
 
 # создаём границы
-Border(5, 5, width - 5, 5)
-Border(5, height - 5, width - 5, height - 5)
-Border(5, 5, 5, height - 5)
-Border(width - 5, 5, width - 5, height - 5)
+Border(5, 5, WIDTH - 5, 5)
+Border(5, HEIGHT - 5, WIDTH - 5, HEIGHT - 5)
+Border(5, 5, 5, HEIGHT - 5)
+Border(WIDTH - 5, 5, WIDTH - 5, HEIGHT - 5)
 
 # создаём шары
 for i in range(50):
