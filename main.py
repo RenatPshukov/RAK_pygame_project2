@@ -5,7 +5,7 @@ from random import randint, choice
 
 # устанавливаем название окну
 pygame.display.set_caption('Insanity balls')  # название
-# задём ширину и высоту
+# задаём ширину и высоту
 SIZE = WIDTH, HEIGHT = 1400, 900
 # устанавливаем размер окна
 screen = pygame.display.set_mode(SIZE)
@@ -18,7 +18,7 @@ def load_image(name, color_key=None):
     # достаём картинку из папки data
     fullname = os.path.join('data', name)
     try:
-        # создаём спрайт убирая задний фон
+        # создаём спрайт, убирая задний фон
         image = pygame.image.load(fullname).convert_alpha()
     # в случае отсутствия картинки в папке data выводим ошибку
     except pygame.error as message:
@@ -77,12 +77,10 @@ class Ball(pygame.sprite.Sprite):
         s = [red_ball, blue_ball, darkblue_ball, green_ball, orange_ball, pink_ball, purple_ball, white_ball,
              yellow_ball]
         super().__init__(group)
+        # выбираем случайный спрайт
         ds = choice(s)
+        # устанавливаем выбранный спрайт
         self.image = ds
-        # self.image = pygame.Surface((2 * radius, 2 * radius),
-        # pygame.SRCALPHA, 32)
-        # pygame.draw.circle(self.image, pygame.Color((randint(0, 255), randint(0, 255), randint(0, 255))),
-        # (radius, radius), radius)
         self.rect = pygame.Rect(x, y, radius, radius)
         self.vx = randint(-13, 13)
         self.vy = randint(-13, 13)
@@ -100,7 +98,7 @@ class Ball(pygame.sprite.Sprite):
             self.vx = -self.vx
 
 
-# группы спрайтов, сожержащие горизониальные и вертикальные границы
+# группы спрайтов, содержащие горизониальные и вертикальные границы
 horizontal_borders = pygame.sprite.Group()
 vertical_borders = pygame.sprite.Group()
 
@@ -137,8 +135,10 @@ for i in range(50):
     Ball(all_sprites, randint(30, 80), randint(100, 1300), randint(100, 800))
 print(all_sprites)
 
+# флаг цикла игры
 running = True
 # TODO основной цикл
+# пока running == True
 while running:
     # инициализация Pygame:
     pygame.init()
@@ -149,7 +149,6 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     # задаём задний фон
-    # screen.fill(pygame.Color('white'))
     bg = pygame.image.load('data\\bg3.png')
     screen.blit(bg, (0, 0))
     # отрисовываем секундомер
