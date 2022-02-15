@@ -153,14 +153,14 @@ cursor = Cursor(trigger)
 # флаг цикла игры
 running = True
 
+# флаг для установки конца игры
+game_over = False
+
 # TODO основной цикл
 # пока running == True
 while running:
     # инициализация Pygame:
     pygame.init()
-
-    # флаг для установки конца игры
-    game_over = False
 
     # ожидание закрытия окна:
     for event in pygame.event.get():
@@ -172,8 +172,8 @@ while running:
             cursor.rect.topleft = event.pos
 
     # задаём задний фон
-    bg = pygame.image.load('data\\bg3.png')
-    screen.blit(bg, (0, 0))
+    BACKGROUND = load_image('bg3.png')
+    screen.blit(BACKGROUND, (0, 0))
 
     # отрисовываем секундомер
     display_time(time_seconds)
@@ -186,6 +186,7 @@ while running:
     for ball in all_sprites:
         if cursor.rect.collidepoint(ball.rect.center):
             running = False
+            game_over = True
 
     # Рисуем объекты на окне
     all_sprites.draw(screen)
