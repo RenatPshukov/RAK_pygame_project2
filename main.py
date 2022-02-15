@@ -5,10 +5,17 @@ from random import randint, choice
 
 # устанавливаем название окну
 pygame.display.set_caption('Insanity balls')  # название
+
+# импортируем картинку логотипа из папки data
+ICON = pygame.image.load('data\\logo_1.png')
+# устанавливаем иконку (логотип)
+pygame.display.set_icon(ICON)
+
 # задаём ширину и высоту
 SIZE = WIDTH, HEIGHT = 1400, 900
 # устанавливаем размер окна
 screen = pygame.display.set_mode(SIZE)
+
 # Используется для управления fps
 clock = pygame.time.Clock()
 
@@ -18,7 +25,7 @@ def load_image(name, color_key=None):
     # достаём картинку из папки data
     fullname = os.path.join('data', name)
     try:
-        # создаём спрайт, убирая задний фон
+        # создаём спрайт убирая задний фон
         image = pygame.image.load(fullname).convert_alpha()
     # в случае отсутствия картинки в папке data выводим ошибку
     except pygame.error as message:
@@ -53,12 +60,6 @@ def display_time(time_s):
     screen.blit(label, (20, 20))
 
 
-# импортируем картинку логотипа из папки data
-ICON = pygame.image.load('data\\logo_1.png')
-# устанавливаем иконку (логотип)
-pygame.display.set_icon(ICON)
-
-
 # TODO класс шарика
 class Ball(pygame.sprite.Sprite):
     # инициализация класса
@@ -77,9 +78,7 @@ class Ball(pygame.sprite.Sprite):
         s = [red_ball, blue_ball, darkblue_ball, green_ball, orange_ball, pink_ball, purple_ball, white_ball,
              yellow_ball]
         super().__init__(group)
-        # выбираем случайный спрайт
         ds = choice(s)
-        # устанавливаем выбранный спрайт
         self.image = ds
         self.rect = pygame.Rect(x, y, radius, radius)
         self.vx = randint(-13, 13)
@@ -98,9 +97,21 @@ class Ball(pygame.sprite.Sprite):
             self.vx = -self.vx
 
 
-# группы спрайтов, содержащие горизониальные и вертикальные границы
+# группы спрайтов, содержащие горизонтальные и вертикальные границы
 horizontal_borders = pygame.sprite.Group()
 vertical_borders = pygame.sprite.Group()
+
+
+# TODO класс игрока(курсора)
+class Cursor(pygame.sprite.Sprite):
+    # инициализация класса
+    def __init__(self, group):
+        super().__init__(group)
+        # импортируем спрайт курсора из папки data
+        self.image = load_image("arrow.png")  # это будет будущий спрайт
+        self.rect = self.image.get_rect()
+        # скрываем системный курсор
+        pygame.mouse.set_visible(False)
 
 
 # TODO класс границ
@@ -131,34 +142,58 @@ Border(5, 5, 5, HEIGHT - 5)
 Border(WIDTH - 5, 5, WIDTH - 5, HEIGHT - 5)
 
 # создаём шары
-for i in range(50):
+for i in range(30):
     Ball(all_sprites, randint(30, 80), randint(100, 1300), randint(100, 800))
-print(all_sprites)
+
+# группа, содержащая спрайт игрока(курсора)
+trigger = pygame.sprite.Group()
+# создаём игрока(курсор)
+cursor = Cursor(trigger)
 
 # флаг цикла игры
 running = True
+
 # TODO основной цикл
 # пока running == True
 while running:
     # инициализация Pygame:
     pygame.init()
+
     # флаг для установки конца игры
     game_over = False
+
     # ожидание закрытия окна:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        # проверка события передвижения мыши
+        if event.type == pygame.MOUSEMOTION:
+            # изменяем положение спрайта-стрелки
+            cursor.rect.topleft = event.pos
+
     # задаём задний фон
     bg = pygame.image.load('data\\bg3.png')
     screen.blit(bg, (0, 0))
+
     # отрисовываем секундомер
     display_time(time_seconds)
+
     # Обновляем спрайты
     all_sprites.update()
+    trigger.update()
+
+    # Проверка на столкновение курсора с шарами
+    for ball in all_sprites:
+        if cursor.rect.collidepoint(ball.rect.center):
+            running = False
+
     # Рисуем объекты на окне
     all_sprites.draw(screen)
+    trigger.draw(screen)
+
     # Обновляем экран после рисования объектов
     pygame.display.flip()
+
     # FPS
     fps = clock.tick(30)
     # конвертируем время (время идёт пока игрок не коснулся шара)
