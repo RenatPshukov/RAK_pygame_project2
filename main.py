@@ -1,5 +1,7 @@
 # TODO Импортируем нужные библиотеки
 import os
+import sqlite3
+
 import pygame
 from random import randint, choice
 
@@ -56,6 +58,18 @@ def display_time(time_s):
     time_str = str(int(time_s * 10) / 10)
     # строка секундомера
     label = font.render(f"Time : {time_str}", True, 'red')
+    # если running == False, то есть игра окончена. Тогда записываем в БД результат
+    if not running:
+        # Подключение к БД
+        con = sqlite3.connect("Insanity_balls.db")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса
+        cur.execute(f"INSERT INTO History (time) VALUES ('{time_str}');")
+        # коммит
+        con.commit()
+        # Закрываем БД
+        con.close()
     # отрисовываем на экране секундомер в координатах (20, 20)
     screen.blit(label, (20, 20))
 
@@ -171,8 +185,9 @@ while running:
             # изменяем положение спрайта-стрелки
             cursor.rect.topleft = event.pos
 
-    # задаём задний фон
+    # импортируем картинку заднего фона из папки data
     BACKGROUND = load_image('bg3.png')
+    # задаём задний фон
     screen.blit(BACKGROUND, (0, 0))
 
     # отрисовываем секундомер
