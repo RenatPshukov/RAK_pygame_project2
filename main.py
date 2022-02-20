@@ -138,6 +138,11 @@ class Cursor(pygame.sprite.Sprite):
         pygame.mouse.set_visible(False)
 
 
+# TODO функцию показа системного курсора
+def mouse_visible():
+    pygame.mouse.set_visible(True)
+
+
 # TODO класс границ
 class Border(pygame.sprite.Sprite):
     # строго вертикальный или строго горизонтальный отрезок
@@ -219,7 +224,7 @@ for i in range(30):
 cursor = Cursor(trigger)
 
 
-# TODO основной цикл
+# TODO основная функция игры
 def main_runner():
     global running
     # переменная времени (секунды)
@@ -268,8 +273,10 @@ def main_runner():
         # Обновляем экран после рисования объектов
         pygame.display.flip()
 
-    # вызываем функцию записи времени в БД
+    # вызываем функцию записи времени в БД после завершения игры
     writing_to_the_database()
+    # вызываем функцию показа системного курсора после завершения игры
+    mouse_visible()
     # возвращаем функцию запроса на повтор или выход из игры
     return game_over()
 
