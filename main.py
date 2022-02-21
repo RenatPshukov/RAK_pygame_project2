@@ -44,6 +44,10 @@ def load_image(name, color_key=None):
     return image
 
 
+# переменная времени (секунды)
+time_seconds = 0
+
+
 # TODO функция секундомера
 def display_time(time_s):
     # временная строка с десятыми долями секунды
@@ -93,6 +97,11 @@ class Ball(pygame.sprite.Sprite):
             self.vx = -self.vx
 
 
+# группы спрайтов, содержащие горизонтальные и вертикальные границы
+horizontal_borders = pygame.sprite.Group()
+vertical_borders = pygame.sprite.Group()
+
+
 # TODO класс игрока(курсора)
 class Cursor(pygame.sprite.Sprite):
     # инициализация класса
@@ -123,37 +132,6 @@ class Border(pygame.sprite.Sprite):
             self.rect = pygame.Rect(x1, y1, x2 - x1, 1)
 
 
-def check_collision(alli):
-    for ball in alli:
-        if cursor.rect.collidepoint(ball.rect.center):
-            return True
-
-
-def game_over():
-    print('-')
-    termination = True
-    while termination:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_RETURN]:
-        print('-')
-        return True
-    if keys[pygame.K_ESCAPE]:
-        print('+')
-        return False
-
-    pygame.display.update()
-    clock.tick(15)
-
-
-# группы спрайтов, содержащие горизонтальные и вертикальные границы
-horizontal_borders = pygame.sprite.Group()
-vertical_borders = pygame.sprite.Group()
-
 # группа, содержащая все спрайты
 all_sprites = pygame.sprite.Group()
 
@@ -172,59 +150,55 @@ trigger = pygame.sprite.Group()
 # создаём игрока(курсор)
 cursor = Cursor(trigger)
 
+# флаг цикла игры
+running = True
 
 # TODO основной цикл
-def main_runner():
-    # переменная времени (секунды)
-    time_seconds = 0
-    # флаг цикла игры
-    running = True
-    # пока running == True
-    while running:
-        # инициализация Pygame:
-        pygame.init()
+# пока running == True
+while running:
+    # инициализация Pygame:
+    pygame.init()
 
-        # флаг для установки конца игры
-        stop = False
+    # флаг для установки конца игры
+    game_over = False
 
-        # ожидание закрытия окна:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-            # проверка события передвижения мыши
-            if event.type == pygame.MOUSEMOTION:
-                # изменяем положение спрайта-стрелки
-                cursor.rect.topleft = event.pos
-
-        # задаём задний фон
-        bg = pygame.image.load('data\\bg3.png')
-        screen.blit(bg, (0, 0))
-
-        # отрисовываем секундомер
-        display_time(time_seconds)
-
-        # Обновляем спрайты
-        all_sprites.update()
-        trigger.update()
-
-        # Рисуем объекты на окне
-        all_sprites.draw(screen)
-        trigger.draw(screen)
-        # Проверка на столкновение курсора с шарами
-        if check_collision(all_sprites):
+    # ожидание закрытия окна:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
             running = False
-        # FPS
-        fps = clock.tick(30)
-        # конвертируем время (время идёт пока игрок не коснулся шара)
-        if not stop:
-            time_seconds += fps / 1000
-        # Обновляем экран после рисования объектов
-        pygame.display.flip()
-    return game_over()
+        # проверка события передвижения мыши
+        if event.type == pygame.MOUSEMOTION:
+            # изменяем положение спрайта-стрелки
+            cursor.rect.topleft = event.pos
 
+    # задаём задний фон
+    bg = pygame.image.load('data\\bg3.png')
+    screen.blit(bg, (0, 0))
 
-while main_runner():
-    pass
+    # отрисовываем секундомер
+    display_time(time_seconds)
+
+    # Обновляем спрайты
+    all_sprites.update()
+    trigger.update()
+
+    # Проверка на столкновение курсора с шарами
+    for ball in all_sprites:
+        if cursor.rect.collidepoint(ball.rect.center):
+            running = False
+
+    # Рисуем объекты на окне
+    all_sprites.draw(screen)
+    trigger.draw(screen)
+
+    # Обновляем экран после рисования объектов
+    pygame.display.flip()
+
+    # FPS
+    fps = clock.tick(30)
+    # конвертируем время (время идёт пока игрок не коснулся шара)
+    if not game_over:
+        time_seconds += fps / 1000
+
+# выход
 pygame.quit()
-quit()
