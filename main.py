@@ -1,2 +1,376 @@
-# это главный файл проекта
-# Артур
+# TODO Импортируем нужные библиотеки
+import os
+import sqlite3
+
+import pygame
+from random import randint, choice
+
+# инициализируем pygame
+pygame.init()
+
+# устанавливаем название окну
+pygame.display.set_caption('Insanity balls')  # название
+
+# импортируем картинку логотипа из папки data
+ICON = pygame.image.load('data\\logo_1.png')
+# устанавливаем иконку (логотип)
+pygame.display.set_icon(ICON)
+
+# задаём ширину и высоту
+SIZE = WIDTH, HEIGHT = 1400, 900
+# устанавливаем размер окна
+screen = pygame.display.set_mode(SIZE)
+
+# Используется для управления fps
+clock = pygame.time.Clock()
+
+
+# TODO функция загрузки спрайтов
+def load_image(name, color_key=None):
+    # достаём картинку из папки data
+    fullname = os.path.join('data', name)
+    try:
+        # создаём спрайт убирая задний фон
+        image = pygame.image.load(fullname).convert_alpha()
+    # в случае отсутствия картинки в папке data выводим ошибку
+    except pygame.error as message:
+        print('Cannot load image:', name)
+        raise SystemExit(message)
+
+    # если есть цветовой ключ то устанавливаем его
+    if color_key is not None:
+        if color_key == -1:
+            color_key = image.get_at((0, 0))
+        image.set_colorkey(color_key)
+    # иначе убираем задний фон спрайта
+    else:
+        image = image.convert_alpha()
+    # возвращаем спрайт
+    return image
+
+
+# флаг цикла игры
+running = True
+# переменная времени (секунды)
+time_str = 0
+
+
+# TODO функция вывода текста на экран игры
+def print_text(message, x, y, font_color, font_size):
+    # устанавливаем шрифт
+    font_type = pygame.font.Font('lilita.otf', font_size)
+    # создаём строку с текстом
+    text = font_type.render(message, True, font_color)
+    # отрисовываем текст на координатах x и y
+    screen.blit(text, (x, y))
+
+
+# TODO функция секундомера
+def display_time(time_s):
+    # импортируем переменные цикла игры и времени для их изменения
+    global running
+    global time_str
+    # устанавливаем шрифт
+    font = pygame.font.Font(None, 30)
+    # временная строка с десятыми долями секунды
+    time_str = str(int(time_s * 10) / 10)
+    # строка секундомера
+    label = font.render(f"Time : {time_str}", True, 'red')
+    # отрисовываем на экране секундомер в координатах (20, 20)
+    screen.blit(label, (20, 20))
+
+
+# TODO функция записи в Базу данных
+def writing_to_the_database():
+    # Подключение к БД
+    con = sqlite3.connect("Insanity balls.db")
+    # Создание курсора
+    cur = con.cursor()
+    # Выполнение запроса
+    cur.execute(f"INSERT INTO History (time) VALUES ('{time_str}');")
+    # коммит
+    con.commit()
+    # Закрываем БД
+    con.close()
+
+
+# TODO класс шарика
+class Ball(pygame.sprite.Sprite):
+    # инициализация класса
+    def __init__(self, group, radius, x, y):
+        global img_counter
+        self.x = x
+        self.y = y
+        self.radius = radius
+        # НЕОБХОДИМО вызвать конструктор родительского класса Sprite
+        # импортируем спрайты шаров из папки data, устанавливая им размер radius
+        red_ball, blue_ball, dark_blue_ball, green_ball, orange_ball, pink_ball, purple_ball, white_ball, yellow_ball = \
+            [], [], [], [], [], [], [], [], []
+        for num in range(24):
+            red_ball.append(pygame.transform.scale(load_image(f"red_balls\\red{num}.png"), (radius, radius)))
+            blue_ball.append(pygame.transform.scale(load_image(f"blue_balls\\blue{num}.png"), (radius, radius)))
+            dark_blue_ball.append(
+                pygame.transform.scale(load_image(f"darkblue_balls\\darkblue{num}.png"), (radius, radius)))
+            green_ball.append(pygame.transform.scale(load_image(f"green_balls\\green{num}.png"), (radius, radius)))
+            orange_ball.append(pygame.transform.scale(load_image(f"orange_balls\\orange{num}.png"), (radius, radius)))
+            pink_ball.append(pygame.transform.scale(load_image(f"pink_balls\\pink{num}.png"), (radius, radius)))
+            purple_ball.append(pygame.transform.scale(load_image(f"purple_balls\\purple{num}.png"), (radius, radius)))
+            white_ball.append(pygame.transform.scale(load_image(f"white_balls\\white{num}.png"), (radius, radius)))
+            yellow_ball.append(pygame.transform.scale(load_image(f"yellow_balls\\yellow{num}.png"), (radius, radius)))
+        # список с спрайтами шаров
+        sprite_list = [red_ball, blue_ball, dark_blue_ball, green_ball, orange_ball, pink_ball, purple_ball, white_ball,
+                       yellow_ball]
+        super().__init__(group)
+
+        # выбираем один случайный спрайт из списка
+        self.selected_sprite = choice(sprite_list)
+        self.vx = randint(-13, 13)
+        self.vy = randint(-13, 13)
+        # если выпало 0, то перезаписываем ещё раз, так же по осям
+        while self.vx == 0:
+            self.vx = randint(-13, 13)
+        while self.vy == 0:
+            self.vy = randint(-13, 13)
+        self.rect = pygame.Rect(self.x, self.y, self.radius, self.radius)
+
+    # функция взаимодествия (столкновение и рикошет) шаров и границ
+    def update(self):
+        global img_counter
+        if img_counter == 1150:
+            img_counter = 0
+        # создаём объект шара
+        self.image = self.selected_sprite[img_counter // 50]
+        # и устанавливаем его на объект шара
+        # указываем случайное направления движения и скорость по осям
+        self.rect = self.rect.move(self.vx, self.vy)
+        # если шар соприкоснулся с горизонтальной границей, то изменяем его направление на противоположное
+        if pygame.sprite.spritecollideany(self, horizontal_borders):
+            self.vy = -self.vy
+        # если шар соприкоснулся с вертикальной границей, то изменяем его направление на противоположное
+        if pygame.sprite.spritecollideany(self, vertical_borders):
+            self.vx = -self.vx
+        img_counter += 1
+
+
+# TODO класс игрока(курсора)
+class Cursor(pygame.sprite.Sprite):
+    # инициализация класса
+    def __init__(self, group):
+        super().__init__(group)
+        # импортируем спрайт курсора из папки data
+        self.image = load_image("arrow.png")  # это будет будущий спрайт
+        self.rect = self.image.get_rect()
+        # скрываем системный курсор
+        pygame.mouse.set_visible(False)
+
+
+# TODO функцию показа системного курсора
+def mouse_visible():
+    pygame.mouse.set_visible(True)
+
+
+# TODO класс границ
+class Border(pygame.sprite.Sprite):
+    # строго вертикальный или строго горизонтальный отрезок
+    # инициализация класса
+    def __init__(self, x1, y1, x2, y2):
+        super().__init__(all_sprites)
+        # вертикальная стенка
+        if x1 == x2:
+            self.add(vertical_borders)
+            self.image = pygame.Surface([1, y2 - y1])
+            self.rect = pygame.Rect(x1, y1, 1, y2 - y1)
+        # горизонтальная стенка
+        else:
+            self.add(horizontal_borders)
+            self.image = pygame.Surface([x2 - x1, 1])
+            self.rect = pygame.Rect(x1, y1, x2 - x1, 1)
+
+
+# TODO конпка
+class Button:
+    def __init__(self, wight, height, font):
+        self.wight = wight
+        self.height = height
+        self.font = font
+        self.inactive_color = (133, 130, 141)
+        self.active_color = (247, 178, 149)
+
+    def draw(self, x, y, message, action=None):
+        mouse = pygame.mouse.get_pos()
+        click = pygame.mouse.get_pressed()
+
+        if x < mouse[0] < x + self.wight and y < mouse[1] < y + self.height:
+            pygame.draw.rect(screen, self.active_color, (x, y, self.wight, self.height))
+            if click[0] == 1 and action is not None:
+                if action == quit:
+                    pygame.quit()
+                    quit()
+                else:
+                    action()
+
+        else:
+            pygame.draw.rect(screen, self.inactive_color, (x, y, self.wight, self.height))
+
+        print_text(message=message, x=x + 10, y=y + 10, font_color=(128, 128, 128), font_size=30)
+
+
+# TODO функция проверки столкновения
+def check_collision(balls):
+    # перебираем все шары из группы спрайтов all_sprites
+    for ball in balls:
+        # если курсор соприкоснулся с центром окружности спрайта возвращаем True
+        if cursor.rect.collidepoint(ball.rect.center):
+            return True
+
+
+# TODO функция запроса на повтор или выход из игры
+def game_over():
+    print('-')
+    # флаг прекращение
+    termination = True
+    # цикл ...
+    while termination:
+        # ожидание закрытия окна:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+    # нажата клавиша
+    keys = pygame.key.get_pressed()
+    # если нажат enter, то возвращаем True
+    if keys[pygame.K_RETURN]:
+        print('-')
+        return True
+    # если нажат escape то возвращаем False
+    if keys[pygame.K_ESCAPE]:
+        print('+')
+        return False
+
+    # обновляем экран
+    pygame.display.update()
+    # устанавливаем 15 fps
+    clock.tick(15)
+
+
+# группы спрайтов, содержащие горизонтальные и вертикальные границы
+horizontal_borders = pygame.sprite.Group()
+vertical_borders = pygame.sprite.Group()
+img_counter = 0
+# группа, содержащая все спрайты
+all_sprites = pygame.sprite.Group()
+
+# группа, содержащая спрайт игрока(курсора)
+trigger = pygame.sprite.Group()
+
+# создаём границы
+Border(5, 5, WIDTH - 5, 5)
+Border(5, HEIGHT - 5, WIDTH - 5, HEIGHT - 5)
+Border(5, 5, 5, HEIGHT - 5)
+Border(WIDTH - 5, 5, WIDTH - 5, HEIGHT - 5)
+
+# создаём шары
+for i in range(30):
+    Ball(all_sprites, randint(30, 80), randint(100, 1300), randint(100, 800))
+
+# создаём игрока(курсор)
+cursor = Cursor(trigger)
+
+
+# TODO функция меню игры
+def show_menu():
+    menu_background = pygame.image.load('menu_background1.png')
+
+    lvl1_btn = Button(283, 60, 'lilita.otf')
+    lvl2_btn = Button(222, 60, 'lilita.otf')
+    lvl3_btn = Button(283, 60, 'lilita.otf')
+    quit_btn = Button(95, 60, 'lilita.otf')
+
+    show = True
+
+    while show:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        screen.blit(menu_background, (0, 0))
+        print_text('Choose the difficulty level:', 400, 480, (243, 246, 238), 50)
+        lvl1_btn.draw(100, 590, 'BALLS TO THE WALL', start_game)
+        lvl2_btn.draw(575, 590, 'BALLS OF STEEL', start_game)
+        lvl3_btn.draw(1000, 590, 'KICK IN THE BALLS', start_game)
+        quit_btn.draw(640, 750, 'QUIT', quit)
+        pygame.display.update()
+        mouse_visible()
+        clock.tick(60)
+
+
+# TODO основная функция игры
+def main_runner():
+    global running
+    # переменная времени (секунды)
+    time_seconds = 0
+    # пока running == True
+    while running:
+        # инициализация Pygame:
+        pygame.init()
+
+        # ожидание закрытия окна:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            # проверка события передвижения мыши
+            if event.type == pygame.MOUSEMOTION:
+                # изменяем положение спрайта-стрелки
+                cursor.rect.topleft = event.pos
+
+        # задаём задний фон
+        bg = pygame.image.load('data\\bg3.png')
+        screen.blit(bg, (0, 0))
+
+        # отрисовываем секундомер
+        display_time(time_seconds)
+
+        # Обновляем спрайты
+        all_sprites.update()
+        trigger.update()
+
+        # Рисуем объекты на окне
+        all_sprites.draw(screen)
+        trigger.draw(screen)
+
+        # Проверка на столкновение курсора с шарами
+        if check_collision(all_sprites):
+            running = False
+
+        # FPS
+        fps = clock.tick(30)
+
+        # конвертируем время (время идёт пока игрок не коснулся шара)
+        if running:
+            time_seconds += fps / 1000
+
+        # Обновляем экран после рисования объектов
+        pygame.display.flip()
+
+    # вызываем функцию записи времени в БД после завершения игры
+    writing_to_the_database()
+    # вызываем функцию показа системного курсора после завершения игры
+    mouse_visible()
+    # возвращаем функцию запроса на повтор или выход из игры
+    return game_over()
+
+
+# TODO главный цикл игры
+def start_game():
+    while main_runner():
+        pass
+
+
+show_menu()
+
+# выход
+pygame.quit()
+quit()
