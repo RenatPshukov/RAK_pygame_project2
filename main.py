@@ -53,12 +53,14 @@ def load_image(name, color_key=None):
 running = True
 # переменная времени (секунды)
 time_str = 0
+# переменная для подсчёта числа кадров в анимации
+img_counter = 0
 
 
 # TODO функция вывода текста на экран игры
 def print_text(message, x, y, font_color, font_size):
     # устанавливаем шрифт
-    font_type = pygame.font.Font('lilita.otf', font_size)
+    font_type = pygame.font.Font('data\\lilita.otf', font_size)
     # создаём строку с текстом
     text = font_type.render(message, True, font_color)
     # отрисовываем текст на координатах x и y
@@ -98,6 +100,7 @@ def writing_to_the_database():
 class Ball(pygame.sprite.Sprite):
     # инициализация класса
     def __init__(self, group, radius, x, y):
+        # импортируем переменную для подсчёта числа кадров в анимации
         global img_counter
         self.x = x
         self.y = y
@@ -124,6 +127,7 @@ class Ball(pygame.sprite.Sprite):
 
         # выбираем один случайный спрайт из списка
         self.selected_sprite = choice(sprite_list)
+        # указываем случайное направления движения и скорость по осям
         self.vx = randint(-13, 13)
         self.vy = randint(-13, 13)
         # если выпало 0, то перезаписываем ещё раз, так же по осям
@@ -131,6 +135,7 @@ class Ball(pygame.sprite.Sprite):
             self.vx = randint(-13, 13)
         while self.vy == 0:
             self.vy = randint(-13, 13)
+        # создаём объект шара
         self.rect = pygame.Rect(self.x, self.y, self.radius, self.radius)
 
     # функция взаимодествия (столкновение и рикошет) шаров и границ
@@ -189,29 +194,41 @@ class Border(pygame.sprite.Sprite):
 
 # TODO конпка
 class Button:
-    def __init__(self, wight, height, font):
-        self.wight = wight
+    def __init__(self, width, height, font):
+        # высота
+        self.width = width
+        # ширина
         self.height = height
+        # шрифт
         self.font = font
-        self.inactive_color = (133, 130, 141)
+        # неактивный цвет
+        self.inactive_color = (234, 160, 154)
+        # активный цвет
         self.active_color = (247, 178, 149)
 
+    # функция отрисовки кнопки
     def draw(self, x, y, message, action=None):
+        # переменная с позицией мышки
         mouse = pygame.mouse.get_pos()
+        # переменная для проверки было ли нажатие
         click = pygame.mouse.get_pressed()
 
-        if x < mouse[0] < x + self.wight and y < mouse[1] < y + self.height:
-            pygame.draw.rect(screen, self.active_color, (x, y, self.wight, self.height))
+        # если курсор наведён на кнопку, то устанавливаем активный цвет
+        if x < mouse[0] < x + self.width and y < mouse[1] < y + self.height:
+            pygame.draw.rect(screen, self.active_color, (x, y, self.width, self.height))
+            # если кнопка нажата и действие не None, то проверяем является ли действие выходу из игры
+            # если да, то выходим из игры, иначе воплняем другое действие.
             if click[0] == 1 and action is not None:
                 if action == quit:
                     pygame.quit()
                     quit()
                 else:
                     action()
-
+        # иначе устанавливаем неактивный цвет
         else:
-            pygame.draw.rect(screen, self.inactive_color, (x, y, self.wight, self.height))
+            pygame.draw.rect(screen, self.inactive_color, (x, y, self.width, self.height))
 
+        # отрисовываем надпись на кнопке
         print_text(message=message, x=x + 10, y=y + 10, font_color=(128, 128, 128), font_size=30)
 
 
@@ -257,7 +274,7 @@ def game_over():
 # группы спрайтов, содержащие горизонтальные и вертикальные границы
 horizontal_borders = pygame.sprite.Group()
 vertical_borders = pygame.sprite.Group()
-img_counter = 0
+
 # группа, содержащая все спрайты
 all_sprites = pygame.sprite.Group()
 
@@ -280,29 +297,40 @@ cursor = Cursor(trigger)
 
 # TODO функция меню игры
 def show_menu():
-    menu_background = pygame.image.load('menu_background1.png')
+    # устанавливаем задний фон меню
+    menu_background = pygame.image.load('data\\menu_background1.png')
 
-    lvl1_btn = Button(283, 60, 'lilita.otf')
-    lvl2_btn = Button(222, 60, 'lilita.otf')
-    lvl3_btn = Button(283, 60, 'lilita.otf')
-    quit_btn = Button(95, 60, 'lilita.otf')
+    # создаём экземпляры кнопок
+    lvl1_btn = Button(283, 60, 'data\\lilita.otf')
+    lvl2_btn = Button(222, 60, 'data\\lilita.otf')
+    lvl3_btn = Button(283, 60, 'data\\lilita.otf')
+    quit_btn = Button(95, 60, 'data\\lilita.otf')
 
+    # флаг показа меню
     show = True
 
+    # цикл показа меню, пока show == True
     while show:
+        # ожидание закрытия окна:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
 
+        # отрисовываем задний фон
         screen.blit(menu_background, (0, 0))
-        print_text('Choose the difficulty level:', 400, 480, (243, 246, 238), 50)
+        # отрисовываем надпись выбора уровня сожности
+        print_text('Choose the difficulty level:', 400, 480, (128, 128, 128), 50)
+        # отрисовываем все кнопки
         lvl1_btn.draw(100, 590, 'BALLS TO THE WALL', start_game)
         lvl2_btn.draw(575, 590, 'BALLS OF STEEL', start_game)
         lvl3_btn.draw(1000, 590, 'KICK IN THE BALLS', start_game)
         quit_btn.draw(640, 750, 'QUIT', quit)
+        # обновляем экран
         pygame.display.update()
+        # вызываем функцию показа системного курсора после завершения игры
         mouse_visible()
+        # устанавливаем 60 fps
         clock.tick(60)
 
 
@@ -315,6 +343,9 @@ def main_runner():
     while running:
         # инициализация Pygame:
         pygame.init()
+
+        # отключаем показ системного курсора
+        pygame.mouse.set_visible(False)
 
         # ожидание закрытия окна:
         for event in pygame.event.get():
@@ -369,6 +400,7 @@ def start_game():
         pass
 
 
+# вызываем функцию показа меню
 show_menu()
 
 # выход
