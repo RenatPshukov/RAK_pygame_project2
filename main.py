@@ -5,6 +5,9 @@ import sqlite3
 import pygame
 from random import randint, choice
 
+# инициализируем pygame
+pygame.init()
+
 # устанавливаем название окну
 pygame.display.set_caption('Insanity balls')  # название
 
@@ -52,6 +55,16 @@ running = True
 time_str = 0
 
 
+# TODO функция вывода текста на экран игры
+def print_text(message, x, y, font_color, font_size):
+    # устанавливаем шрифт
+    font_type = pygame.font.Font('lilita.otf', font_size)
+    # создаём строку с текстом
+    text = font_type.render(message, True, font_color)
+    # отрисовываем текст на координатах x и y
+    screen.blit(text, (x, y))
+
+
 # TODO функция секундомера
 def display_time(time_s):
     # импортируем переменные цикла игры и времени для их изменения
@@ -96,7 +109,8 @@ class Ball(pygame.sprite.Sprite):
         for num in range(24):
             red_ball.append(pygame.transform.scale(load_image(f"red_balls\\red{num}.png"), (radius, radius)))
             blue_ball.append(pygame.transform.scale(load_image(f"blue_balls\\blue{num}.png"), (radius, radius)))
-            dark_blue_ball.append(pygame.transform.scale(load_image(f"darkblue_balls\\darkblue{num}.png"), (radius, radius)))
+            dark_blue_ball.append(
+                pygame.transform.scale(load_image(f"darkblue_balls\\darkblue{num}.png"), (radius, radius)))
             green_ball.append(pygame.transform.scale(load_image(f"green_balls\\green{num}.png"), (radius, radius)))
             orange_ball.append(pygame.transform.scale(load_image(f"orange_balls\\orange{num}.png"), (radius, radius)))
             pink_ball.append(pygame.transform.scale(load_image(f"pink_balls\\pink{num}.png"), (radius, radius)))
@@ -104,7 +118,8 @@ class Ball(pygame.sprite.Sprite):
             white_ball.append(pygame.transform.scale(load_image(f"white_balls\\white{num}.png"), (radius, radius)))
             yellow_ball.append(pygame.transform.scale(load_image(f"yellow_balls\\yellow{num}.png"), (radius, radius)))
         # список с спрайтами шаров
-        sprite_list = [red_ball, blue_ball, dark_blue_ball, green_ball, orange_ball, pink_ball, purple_ball, white_ball, yellow_ball]
+        sprite_list = [red_ball, blue_ball, dark_blue_ball, green_ball, orange_ball, pink_ball, purple_ball, white_ball,
+                       yellow_ball]
         super().__init__(group)
 
         # выбираем один случайный спрайт из списка
@@ -172,6 +187,34 @@ class Border(pygame.sprite.Sprite):
             self.rect = pygame.Rect(x1, y1, x2 - x1, 1)
 
 
+# TODO конпка
+class Button:
+    def __init__(self, wight, height, font):
+        self.wight = wight
+        self.height = height
+        self.font = font
+        self.inactive_color = (133, 130, 141)
+        self.active_color = (247, 178, 149)
+
+    def draw(self, x, y, message, action=None):
+        mouse = pygame.mouse.get_pos()
+        click = pygame.mouse.get_pressed()
+
+        if x < mouse[0] < x + self.wight and y < mouse[1] < y + self.height:
+            pygame.draw.rect(screen, self.active_color, (x, y, self.wight, self.height))
+            if click[0] == 1 and action is not None:
+                if action == quit:
+                    pygame.quit()
+                    quit()
+                else:
+                    action()
+
+        else:
+            pygame.draw.rect(screen, self.inactive_color, (x, y, self.wight, self.height))
+
+        print_text(message=message, x=x + 10, y=y + 10, font_color=(128, 128, 128), font_size=30)
+
+
 # TODO функция проверки столкновения
 def check_collision(balls):
     # перебираем все шары из группы спрайтов all_sprites
@@ -235,6 +278,34 @@ for i in range(30):
 cursor = Cursor(trigger)
 
 
+# TODO функция меню игры
+def show_menu():
+    menu_background = pygame.image.load('menu_background1.png')
+
+    lvl1_btn = Button(283, 60, 'lilita.otf')
+    lvl2_btn = Button(222, 60, 'lilita.otf')
+    lvl3_btn = Button(283, 60, 'lilita.otf')
+    quit_btn = Button(95, 60, 'lilita.otf')
+
+    show = True
+
+    while show:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        screen.blit(menu_background, (0, 0))
+        print_text('Choose the difficulty level:', 400, 480, (243, 246, 238), 50)
+        lvl1_btn.draw(100, 590, 'BALLS TO THE WALL', start_game)
+        lvl2_btn.draw(575, 590, 'BALLS OF STEEL', start_game)
+        lvl3_btn.draw(1000, 590, 'KICK IN THE BALLS', start_game)
+        quit_btn.draw(640, 750, 'QUIT', quit)
+        pygame.display.update()
+        mouse_visible()
+        clock.tick(60)
+
+
 # TODO основная функция игры
 def main_runner():
     global running
@@ -293,8 +364,12 @@ def main_runner():
 
 
 # TODO главный цикл игры
-while main_runner():
-    pass
+def start_game():
+    while main_runner():
+        pass
+
+
+show_menu()
 
 # выход
 pygame.quit()
