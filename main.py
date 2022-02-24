@@ -49,12 +49,22 @@ def load_image(name, color_key=None):
     return image
 
 
-# флаг цикла игры
-running = True
-# переменная времени (секунды)
-time_str = 0
-# переменная для подсчёта числа кадров в анимации
-img_counter = 0
+RED_BALL, BLUE_BALL, DARKBLUE_BALL, GREEN_BALL, ORANGE_BALL, PINK_BALL, PURPLE_BALL, WHITE_BALL, YELLOW_BALL = \
+            [], [], [], [], [], [], [], [], []
+# импорт анимации
+for num in range(24):
+    RED_BALL.append(load_image(f"red_balls\\red{num}.png"))
+    BLUE_BALL.append(load_image(f"blue_balls\\blue{num}.png"))
+    DARKBLUE_BALL.append(load_image(f"darkblue_balls\\darkblue{num}.png"))
+    GREEN_BALL.append(load_image(f"green_balls\\green{num}.png"))
+    ORANGE_BALL.append(load_image(f"orange_balls\\orange{num}.png"))
+    PINK_BALL.append(load_image(f"pink_balls\\pink{num}.png"))
+    PURPLE_BALL.append(load_image(f"purple_balls\\purple{num}.png"))
+    WHITE_BALL.append(load_image(f"white_balls\\white{num}.png"))
+    YELLOW_BALL.append(load_image(f"yellow_balls\\yellow{num}.png"))
+# список со спрайтами шаров
+SPRITE_LIST = [RED_BALL, BLUE_BALL, DARKBLUE_BALL, GREEN_BALL, ORANGE_BALL, PINK_BALL, PURPLE_BALL, WHITE_BALL,
+               YELLOW_BALL]
 
 
 # TODO функция вывода текста на экран игры
@@ -104,29 +114,12 @@ class Ball(pygame.sprite.Sprite):
         global img_counter
         self.x = x
         self.y = y
-        self.radius = radius
         # НЕОБХОДИМО вызвать конструктор родительского класса Sprite
         # импортируем спрайты шаров из папки data, устанавливая им размер radius
-        red_ball, blue_ball, dark_blue_ball, green_ball, orange_ball, pink_ball, purple_ball, white_ball, yellow_ball = \
-            [], [], [], [], [], [], [], [], []
-        for num in range(24):
-            red_ball.append(pygame.transform.scale(load_image(f"red_balls\\red{num}.png"), (radius, radius)))
-            blue_ball.append(pygame.transform.scale(load_image(f"blue_balls\\blue{num}.png"), (radius, radius)))
-            dark_blue_ball.append(
-                pygame.transform.scale(load_image(f"darkblue_balls\\darkblue{num}.png"), (radius, radius)))
-            green_ball.append(pygame.transform.scale(load_image(f"green_balls\\green{num}.png"), (radius, radius)))
-            orange_ball.append(pygame.transform.scale(load_image(f"orange_balls\\orange{num}.png"), (radius, radius)))
-            pink_ball.append(pygame.transform.scale(load_image(f"pink_balls\\pink{num}.png"), (radius, radius)))
-            purple_ball.append(pygame.transform.scale(load_image(f"purple_balls\\purple{num}.png"), (radius, radius)))
-            white_ball.append(pygame.transform.scale(load_image(f"white_balls\\white{num}.png"), (radius, radius)))
-            yellow_ball.append(pygame.transform.scale(load_image(f"yellow_balls\\yellow{num}.png"), (radius, radius)))
-        # список с спрайтами шаров
-        sprite_list = [red_ball, blue_ball, dark_blue_ball, green_ball, orange_ball, pink_ball, purple_ball, white_ball,
-                       yellow_ball]
-        super().__init__(group)
 
+        super().__init__(group)
         # выбираем один случайный спрайт из списка
-        self.selected_sprite = choice(sprite_list)
+        self.selected_sprite = [pygame.transform.scale(i, (radius, radius)) for i in choice(SPRITE_LIST)]
         # указываем случайное направления движения и скорость по осям
         self.vx = randint(-13, 13)
         self.vy = randint(-13, 13)
@@ -136,11 +129,12 @@ class Ball(pygame.sprite.Sprite):
         while self.vy == 0:
             self.vy = randint(-13, 13)
         # создаём объект шара
-        self.rect = pygame.Rect(self.x, self.y, self.radius, self.radius)
+        self.rect = pygame.Rect(self.x, self.y, radius, radius)
 
     # функция взаимодествия (столкновение и рикошет) шаров и границ
     def update(self):
         global img_counter
+        # проверка, были ли использованы все спрайты
         if img_counter == 1150:
             img_counter = 0
         # создаём объект шара
@@ -154,6 +148,7 @@ class Ball(pygame.sprite.Sprite):
         # если шар соприкоснулся с вертикальной границей, то изменяем его направление на противоположное
         if pygame.sprite.spritecollideany(self, vertical_borders):
             self.vx = -self.vx
+        # на один шаг ближе к новому спрайту
         img_counter += 1
 
 
@@ -169,7 +164,7 @@ class Cursor(pygame.sprite.Sprite):
         pygame.mouse.set_visible(False)
 
 
-# TODO функцию показа системного курсора
+# TODO функция показа системного курсора
 def mouse_visible():
     pygame.mouse.set_visible(True)
 
@@ -192,7 +187,7 @@ class Border(pygame.sprite.Sprite):
             self.rect = pygame.Rect(x1, y1, x2 - x1, 1)
 
 
-# TODO конпка
+# TODO класс кнопка
 class Button:
     def __init__(self, width, height, font):
         # высота
@@ -216,8 +211,8 @@ class Button:
         # если курсор наведён на кнопку, то устанавливаем активный цвет
         if x < mouse[0] < x + self.width and y < mouse[1] < y + self.height:
             pygame.draw.rect(screen, self.active_color, (x, y, self.width, self.height))
-            # если кнопка нажата и действие не None, то проверяем является ли действие выходу из игры
-            # если да, то выходим из игры, иначе воплняем другое действие.
+            ''' если кнопка нажата и действие не None, то проверяем является ли действие выходу из игры
+                если да, то выходим из игры, иначе выполняем другое действие. '''
             if click[0] == 1 and action is not None:
                 if action == quit:
                     pygame.quit()
@@ -241,58 +236,30 @@ def check_collision(balls):
             return True
 
 
-# TODO функция запроса на повтор или выход из игры
+# TODO функция запроса на повтор, выход в меню или выход из игры
 def game_over():
-    print('-')
     # флаг прекращение
     termination = True
-    # цикл ...
+    # цикл, в период которого игрок решает, играть ему снова, выйти в меню или же закрыть игру
     while termination:
         # ожидание закрытия окна:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-
-    # нажата клавиша
-    keys = pygame.key.get_pressed()
-    # если нажат enter, то возвращаем True
-    if keys[pygame.K_RETURN]:
-        print('-')
-        return True
-    # если нажат escape то возвращаем False
-    if keys[pygame.K_ESCAPE]:
-        print('+')
-        return False
+        # нажата клавиша
+        keys = pygame.key.get_pressed()
+        # если нажат enter, то возвращаем True
+        if keys[pygame.K_RETURN]:
+            return True
+        # если нажат escape то возвращаем False
+        if keys[pygame.K_ESCAPE]:
+            return False
 
     # обновляем экран
     pygame.display.update()
     # устанавливаем 15 fps
     clock.tick(15)
-
-
-# группы спрайтов, содержащие горизонтальные и вертикальные границы
-horizontal_borders = pygame.sprite.Group()
-vertical_borders = pygame.sprite.Group()
-
-# группа, содержащая все спрайты
-all_sprites = pygame.sprite.Group()
-
-# группа, содержащая спрайт игрока(курсора)
-trigger = pygame.sprite.Group()
-
-# создаём границы
-Border(5, 5, WIDTH - 5, 5)
-Border(5, HEIGHT - 5, WIDTH - 5, HEIGHT - 5)
-Border(5, 5, 5, HEIGHT - 5)
-Border(WIDTH - 5, 5, WIDTH - 5, HEIGHT - 5)
-
-# создаём шары
-for i in range(30):
-    Ball(all_sprites, randint(30, 80), randint(100, 1300), randint(100, 800))
-
-# создаём игрока(курсор)
-cursor = Cursor(trigger)
 
 
 # TODO функция меню игры
@@ -319,7 +286,7 @@ def show_menu():
 
         # отрисовываем задний фон
         screen.blit(menu_background, (0, 0))
-        # отрисовываем надпись выбора уровня сожности
+        # отрисовываем надпись выбора уровня сложности
         print_text('Choose the difficulty level:', 400, 480, (128, 128, 128), 50)
         # отрисовываем все кнопки
         lvl1_btn.draw(100, 590, 'BALLS TO THE WALL', start_game)
@@ -396,13 +363,72 @@ def main_runner():
 
 # TODO главный цикл игры
 def start_game():
-    while main_runner():
-        pass
+    global running
+    global time_str
+    global img_counter
+    global all_sprites
+    global trigger
+    global cursor
+    global horizontal_borders
+    global vertical_borders
+
+    while True:
+        running = True
+        # переменная времени (секунды)
+        time_str = 0
+        # переменная для подсчёта числа кадров в анимации
+        img_counter = 0
+        # группа, содержащая все спрайты
+        all_sprites = pygame.sprite.Group()
+
+        # группа, содержащая спрайт игрока(курсора)
+        trigger = pygame.sprite.Group()
+
+        # создаём шары
+        for i in range(30):
+            Ball(all_sprites, randint(30, 80), randint(100, 1300), randint(100, 800))
+
+        # создаём игрока(курсор)
+        cursor = Cursor(trigger)
+        # группы спрайтов, содержащие горизонтальные и вертикальные границы
+        horizontal_borders = pygame.sprite.Group()
+        vertical_borders = pygame.sprite.Group()
+
+        # создаём границы
+        Border(5, 5, WIDTH - 5, 5)
+        Border(5, HEIGHT - 5, WIDTH - 5, HEIGHT - 5)
+        Border(5, 5, 5, HEIGHT - 5)
+        Border(WIDTH - 5, 5, WIDTH - 5, HEIGHT - 5)
+        if not main_runner():
+            show_menu()
 
 
+# флаг цикла игры
+running = True
+# переменная времени (секунды)
+time_str = 0
+# переменная для подсчёта числа кадров в анимации
+img_counter = 0
+# группа, содержащая все спрайты
+all_sprites = pygame.sprite.Group()
+
+# группа, содержащая спрайт игрока(курсора)
+trigger = pygame.sprite.Group()
+
+# создаём шары
+for i in range(30):
+    Ball(all_sprites, randint(30, 80), randint(100, 1300), randint(100, 800))
+
+# создаём игрока(курсор)
+cursor = Cursor(trigger)
+# группы спрайтов, содержащие горизонтальные и вертикальные границы
+horizontal_borders = pygame.sprite.Group()
+vertical_borders = pygame.sprite.Group()
+
+# создаём границы
+Border(5, 5, WIDTH - 5, 5)
+Border(5, HEIGHT - 5, WIDTH - 5, HEIGHT - 5)
+Border(5, 5, 5, HEIGHT - 5)
+Border(WIDTH - 5, 5, WIDTH - 5, HEIGHT - 5)
 # вызываем функцию показа меню
 show_menu()
-
-# выход
-pygame.quit()
-quit()
