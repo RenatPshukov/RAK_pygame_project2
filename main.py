@@ -358,7 +358,9 @@ def game_over():
         # отрисовываем надпись конца игры и результат с рекордом
         print_text('GAME OVER', 430, 100, (0, 0, 0), 100)
         print_text(f'Your result: {time_str}', 500, 300, (0, 0, 0), 60)
-        print_text(f'Your record: {record[0]}', 505, 450, (0, 0, 0), 55)
+        print_text(f'Your record: {record[0]}', 505, 400, (0, 0, 0), 55)
+        print_text('Press Enter to restart', 450, 550, (0, 0, 0), 55)
+        print_text('Press Escape to return to the menu', 320, 650, (0, 0, 0), 55)
         # обновляем экран
         pygame.display.update()
         # вызываем функцию показа системного курсора после завершения игры
