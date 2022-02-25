@@ -187,31 +187,43 @@ class Border(pygame.sprite.Sprite):
             self.rect = pygame.Rect(x1, y1, x2 - x1, 1)
 
 
-# TODO конпка
+# TODO класс кнопка
 class Button:
-    def __init__(self, wight, height, font):
-        self.wight = wight
+    def __init__(self, width, height, font):
+        # высота
+        self.width = width
+        # ширина
         self.height = height
+        # шрифт
         self.font = font
-        self.inactive_color = (133, 130, 141)
+        # неактивный цвет
+        self.inactive_color = (234, 160, 154)
+        # активный цвет
         self.active_color = (247, 178, 149)
 
+    # функция отрисовки кнопки
     def draw(self, x, y, message, action=None):
+        # переменная с позицией мышки
         mouse = pygame.mouse.get_pos()
+        # переменная для проверки было ли нажатие
         click = pygame.mouse.get_pressed()
 
-        if x < mouse[0] < x + self.wight and y < mouse[1] < y + self.height:
-            pygame.draw.rect(screen, self.active_color, (x, y, self.wight, self.height))
+        # если курсор наведён на кнопку, то устанавливаем активный цвет
+        if x < mouse[0] < x + self.width and y < mouse[1] < y + self.height:
+            pygame.draw.rect(screen, self.active_color, (x, y, self.width, self.height))
+            ''' если кнопка нажата и действие не None, то проверяем является ли действие выходу из игры
+                если да, то выходим из игры, иначе выполняем другое действие. '''
             if click[0] == 1 and action is not None:
                 if action == quit:
                     pygame.quit()
                     quit()
                 else:
                     action()
-
+        # иначе устанавливаем неактивный цвет
         else:
-            pygame.draw.rect(screen, self.inactive_color, (x, y, self.wight, self.height))
+            pygame.draw.rect(screen, self.inactive_color, (x, y, self.width, self.height))
 
+        # отрисовываем надпись на кнопке
         print_text(message=message, x=x + 10, y=y + 10, font_color=(128, 128, 128), font_size=30)
 
 
@@ -224,34 +236,108 @@ def check_collision(balls):
             return True
 
 
-# TODO функция запроса на повтор или выход из игры
-def game_over():
-    print('-')
+# TODO функция запроса на повтор, выход в меню или выход из игры
+def end_of_game_requests():
     # флаг прекращение
     termination = True
-    # цикл ...
+    # цикл, в период которого игрок решает, играть ему снова, выйти в меню или же закрыть игру
     while termination:
         # ожидание закрытия окна:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-
-    # нажата клавиша
-    keys = pygame.key.get_pressed()
-    # если нажат enter, то возвращаем True
-    if keys[pygame.K_RETURN]:
-        print('-')
-        return True
-    # если нажат escape то возвращаем False
-    if keys[pygame.K_ESCAPE]:
-        print('+')
-        return False
+        # нажата клавиша
+        keys = pygame.key.get_pressed()
+        # если нажат enter, то возвращаем True
+        if keys[pygame.K_RETURN]:
+            return True
+        # если нажат escape то возвращаем False
+        if keys[pygame.K_ESCAPE]:
+            return False
 
     # обновляем экран
     pygame.display.update()
     # устанавливаем 15 fps
     clock.tick(15)
+
+
+# TODO функция меню игры
+def show_menu():
+    # устанавливаем задний фон меню
+    menu_background = load_image('menu_background1.png')
+
+    # создаём экземпляры кнопок
+    lvl1_btn = Button(283, 60, 'data\\lilita.otf')
+    lvl2_btn = Button(222, 60, 'data\\lilita.otf')
+    lvl3_btn = Button(283, 60, 'data\\lilita.otf')
+    quit_btn = Button(95, 60, 'data\\lilita.otf')
+
+    # флаг показа меню
+    show = True
+
+    # цикл показа меню, пока show == True
+    while show:
+        # ожидание закрытия окна:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        # отрисовываем задний фон
+        screen.blit(menu_background, (0, 0))
+        # отрисовываем надпись выбора уровня сложности
+        print_text('Choose the difficulty level:', 400, 480, (128, 128, 128), 50)
+        # отрисовываем все кнопки
+        lvl1_btn.draw(100, 590, 'BALLS TO THE WALL', level1)
+        lvl2_btn.draw(575, 590, 'BALLS OF STEEL', level2)
+        lvl3_btn.draw(1000, 590, 'KICK IN THE BALLS', level3)
+        quit_btn.draw(640, 750, 'QUIT', quit)
+        # обновляем экран
+        pygame.display.update()
+        # вызываем функцию показа системного курсора после завершения игры
+        mouse_visible()
+        # устанавливаем 60 fps
+        clock.tick(60)
+
+
+# TODO функция финального окна
+def game_over():
+    # устанавливаем задний фон конца игры
+    game_over_background = pygame.image.load('game_over_background.png')
+
+    # флаг показа меню
+    show = True
+
+    # цикл показа меню, пока show == True
+    while show:
+        # ожидание закрытия окна:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        # нажата клавиша
+        keys = pygame.key.get_pressed()
+        # если нажат enter, то возвращаем True
+        if keys[pygame.K_RETURN]:
+            return True
+        # если нажат escape то возвращаем False
+        if keys[pygame.K_ESCAPE]:
+            return False
+
+        # отрисовываем задний фон
+        screen.blit(game_over_background, (0, 0))
+        # отрисовываем надпись конца игры и результат с рекордом
+        print_text('GAME OVER', 430, 100, (0, 0, 0), 100)
+        print_text(f'Your result: {time_str}', 500, 300, (0, 0, 0), 60)
+        print_text(f'Your record: {}', 505, 450, (0, 0, 0), 55)
+        # обновляем экран
+        pygame.display.update()
+        # вызываем функцию показа системного курсора после завершения игры
+        mouse_visible()
+        # устанавливаем 60 fps
+        clock.tick(60)
 
 
 # группы спрайтов, содержащие горизонтальные и вертикальные границы
