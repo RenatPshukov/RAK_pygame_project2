@@ -4,6 +4,7 @@ import sqlite3
 
 import pygame
 from random import randint, choice
+from datetime import datetime
 
 # инициализируем pygame
 pygame.init()
@@ -270,9 +271,8 @@ def end_of_game_requests():
 
 
 # TODO функция меню игры
-def show_menu():
+def show_menu(menu_background):
     # устанавливаем задний фон меню
-    menu_background = load_image('menu_background1.png')
 
     # создаём экземпляры кнопок
     lvl1_btn = Button(283, 60, 'data\\lilita.otf')
@@ -293,6 +293,8 @@ def show_menu():
 
         # отрисовываем задний фон
         screen.blit(menu_background, (0, 0))
+        logo_menu = pygame.transform.scale(load_image('menu_logo.png'), (460, 390))
+        screen.blit(logo_menu, (450, 50))
         # отрисовываем надпись выбора уровня сложности
         print_text('Choose the difficulty level:', 400, 480, (128, 128, 128), 50)
         # отрисовываем все кнопки
@@ -309,11 +311,11 @@ def show_menu():
 
 
 # TODO функция финального окна
-def game_over():
+def game_over(game_over_background):
     # устанавливаем задний фон конца игры
-    game_over_background = load_image('game_over_background.png')
 
     # флаг показа меню
+    global record
     show = True
 
     # Подключение к БД
@@ -369,8 +371,41 @@ def game_over():
         clock.tick(60)
 
 
+# TODO отсчёт перед началом боя
+def time_report(bg):
+    # задаём задний фон
+
+    counter, text = 3, '3'.rjust(3)
+    pygame.time.set_timer(pygame.USEREVENT, 1000)
+
+    run = True
+    # цикл показа меню, пока run == True
+    while run:
+        for event in pygame.event.get():
+            if event.type == pygame.USEREVENT:
+                counter -= 1
+                if counter > 0:
+                    text = str(counter).rjust(3)
+                else:
+                    run = False
+            # ожидание закрытия окна:
+            if event.type == pygame.QUIT:
+                run = False
+
+        # отрисовываем задний фон
+        screen.blit(bg, (0, 0))
+        # отрисовываем отчёт времени
+        print_text(text, 500, 250, (0, 0, 0), 300)
+        # обновляем экран
+        pygame.display.flip()
+        # вызываем функцию показа системного курсора после завершения игры
+        mouse_visible()
+        # устанавливаем 60 fps
+        clock.tick(60)
+
+
 # TODO основная функция игры
-def main_runner():
+def main_runner(bg):
     global running
     # переменная времени (секунды)
     time_seconds = 0
@@ -393,7 +428,6 @@ def main_runner():
                 cursor.rect.topleft = event.pos
 
         # задаём задний фон
-        bg = pygame.image.load('data\\bg3.png')
         screen.blit(bg, (0, 0))
 
         # отрисовываем секундомер
@@ -412,7 +446,7 @@ def main_runner():
             # вызываем функцию записи времени в БД после завершения игры
             writing_to_the_database()
             # вызываем функцию показа финального окна
-            game_over()
+            game_over(game_over_background)
             running = False
 
         # FPS
@@ -480,8 +514,11 @@ def level1():
         Border(5, 5, 5, HEIGHT - 5)
         Border(WIDTH - 5, 5, WIDTH - 5, HEIGHT - 5)
 
-        if not main_runner():
-            show_menu()
+        # Создал отсчёт времени перед запуском боя
+        time_report(bg)
+
+        if not main_runner(bg):
+            show_menu(menu_background)
 
 
 # TODO второй уровень
@@ -529,8 +566,11 @@ def level2():
         Border(5, 5, 5, HEIGHT - 5)
         Border(WIDTH - 5, 5, WIDTH - 5, HEIGHT - 5)
 
-        if not main_runner():
-            show_menu()
+        # Создал отсчёт времени перед запуском боя
+        time_report(bg)
+
+        if not main_runner(bg):
+            show_menu(menu_background)
 
 
 # TODO третий уровень
@@ -579,9 +619,56 @@ def level3():
         Border(5, 5, 5, HEIGHT - 5)
         Border(WIDTH - 5, 5, WIDTH - 5, HEIGHT - 5)
 
-        if not main_runner():
-            show_menu()
+        # Создал отсчёт времени перед запуском боя
+        time_report(bg)
 
+        if not main_runner(bg):
+            show_menu(menu_background)
+
+
+data = datetime.now()
+if data.replace(hour=7, minute=0, second=0, microsecond=0) <= data < \
+        data.replace(hour=12, minute=0, second=0, microsecond=0):
+    game_over_background = pygame.image.load('data\\menu_back\\morning.png')
+elif data.replace(hour=12, minute=0, second=0, microsecond=0) <= data < \
+        data.replace(hour=17, minute=0, second=0, microsecond=0):
+    game_over_background = pygame.image.load('data\\menu_back\\day.png')
+elif data.replace(hour=17, minute=0, second=0, microsecond=0) <= data < \
+        data.replace(hour=21, minute=0, second=0, microsecond=0):
+    game_over_background = pygame.image.load('data\\menu_back\\evening.png')
+elif data.replace(hour=21, minute=0, second=0, microsecond=0) <= data or \
+        data < data.replace(hour=7, minute=0, second=0, microsecond=0):
+    game_over_background = pygame.image.load('data\\menu_back\\night.png')
+else:
+    game_over_background = 'ну даёт этот python, без этого else не работает'
+if data.replace(hour=7, minute=0, second=0, microsecond=0) <= data < \
+        data.replace(hour=12, minute=0, second=0, microsecond=0):
+    menu_background = pygame.image.load('data\\menu_back\\morning.png')
+elif data.replace(hour=12, minute=0, second=0, microsecond=0) <= data < \
+        data.replace(hour=17, minute=0, second=0, microsecond=0):
+    menu_background = pygame.image.load('data\\menu_back\\day.png')
+elif data.replace(hour=17, minute=0, second=0, microsecond=0) <= data < \
+        data.replace(hour=21, minute=0, second=0, microsecond=0):
+    menu_background = pygame.image.load('data\\menu_back\\evening.png')
+elif data.replace(hour=21, minute=0, second=0, microsecond=0) <= data or \
+        data < data.replace(hour=7, minute=0, second=0, microsecond=0):
+    menu_background = pygame.image.load('data\\menu_back\\night.png')
+else:
+    menu_background = 'ну даёт этот python, без этого else не работает'
+if data.replace(hour=7, minute=0, second=0, microsecond=0) <= data < \
+        data.replace(hour=12, minute=0, second=0, microsecond=0):
+    bg = pygame.image.load('data\\menu_back\\morning.png')
+elif data.replace(hour=12, minute=0, second=0, microsecond=0) <= data < \
+        data.replace(hour=17, minute=0, second=0, microsecond=0):
+    bg = pygame.image.load('data\\menu_back\\day.png')
+elif data.replace(hour=17, minute=0, second=0, microsecond=0) <= data < \
+        data.replace(hour=21, minute=0, second=0, microsecond=0):
+    bg = pygame.image.load('data\\menu_back\\evening.png')
+elif data.replace(hour=21, minute=0, second=0, microsecond=0) <= data or \
+        data < data.replace(hour=7, minute=0, second=0, microsecond=0):
+    bg = pygame.image.load('data\\menu_back\\night.png')
+else:
+    bg = 'ну даёт этот python, без этого else не работает'
 
 # обозначение lvl
 mode = '1'
@@ -619,4 +706,4 @@ Border(5, 5, 5, HEIGHT - 5)
 Border(WIDTH - 5, 5, WIDTH - 5, HEIGHT - 5)
 
 # вызываем функцию показа меню
-show_menu()
+show_menu(menu_background)
