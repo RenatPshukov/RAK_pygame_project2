@@ -629,16 +629,16 @@ def level3():
 data = datetime.now()
 if data.replace(hour=7, minute=0, second=0, microsecond=0) <= data < \
         data.replace(hour=12, minute=0, second=0, microsecond=0):
-    game_over_background = pygame.image.load('data\\menu_back\\morning.png')
+    game_over_background = pygame.image.load('data\\over_back\\morning.png')
 elif data.replace(hour=12, minute=0, second=0, microsecond=0) <= data < \
         data.replace(hour=17, minute=0, second=0, microsecond=0):
-    game_over_background = pygame.image.load('data\\menu_back\\day.png')
+    game_over_background = pygame.image.load('data\\over_back\\day.png')
 elif data.replace(hour=17, minute=0, second=0, microsecond=0) <= data < \
         data.replace(hour=21, minute=0, second=0, microsecond=0):
-    game_over_background = pygame.image.load('data\\menu_back\\evening.png')
+    game_over_background = pygame.image.load('data\\over_back\\evening.png')
 elif data.replace(hour=21, minute=0, second=0, microsecond=0) <= data or \
         data < data.replace(hour=7, minute=0, second=0, microsecond=0):
-    game_over_background = pygame.image.load('data\\menu_back\\night.png')
+    game_over_background = pygame.image.load('data\\over_back\\night.png')
 else:
     game_over_background = 'ну даёт этот python, без этого else не работает'
 if data.replace(hour=7, minute=0, second=0, microsecond=0) <= data < \
@@ -657,16 +657,16 @@ else:
     menu_background = 'ну даёт этот python, без этого else не работает'
 if data.replace(hour=7, minute=0, second=0, microsecond=0) <= data < \
         data.replace(hour=12, minute=0, second=0, microsecond=0):
-    bg = pygame.image.load('data\\menu_back\\morning.png')
+    bg = pygame.image.load('data\\game_back\\morning.png')
 elif data.replace(hour=12, minute=0, second=0, microsecond=0) <= data < \
         data.replace(hour=17, minute=0, second=0, microsecond=0):
-    bg = pygame.image.load('data\\menu_back\\day.png')
+    bg = pygame.image.load('data\\game_back\\day.png')
 elif data.replace(hour=17, minute=0, second=0, microsecond=0) <= data < \
         data.replace(hour=21, minute=0, second=0, microsecond=0):
-    bg = pygame.image.load('data\\menu_back\\evening.png')
+    bg = pygame.image.load('data\\game_back\\evening.png')
 elif data.replace(hour=21, minute=0, second=0, microsecond=0) <= data or \
         data < data.replace(hour=7, minute=0, second=0, microsecond=0):
-    bg = pygame.image.load('data\\menu_back\\night.png')
+    bg = pygame.image.load('data\\game_back\\night.png')
 else:
     bg = 'ну даёт этот python, без этого else не работает'
 
