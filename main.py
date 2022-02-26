@@ -369,6 +369,39 @@ def game_over():
         clock.tick(60)
 
 
+def time_report():
+    # задаём задний фон
+    bg = load_image('bg3.png')
+
+    counter, text = 3, '3'.rjust(3)
+    pygame.time.set_timer(pygame.USEREVENT, 1000)
+
+    run = True
+    # цикл показа меню, пока run == True
+    while run:
+        for event in pygame.event.get():
+            if event.type == pygame.USEREVENT:
+                counter -= 1
+                if counter > 0:
+                    text = str(counter).rjust(3)
+                else:
+                    run = False
+            # ожидание закрытия окна:
+            if event.type == pygame.QUIT:
+                run = False
+
+        # отрисовываем задний фон
+        screen.blit(bg, (0, 0))
+        # отрисовываем отчёт времени
+        print_text(text, 500, 250, (0, 0, 0), 300)
+        # обновляем экран
+        pygame.display.flip()
+        # вызываем функцию показа системного курсора после завершения игры
+        mouse_visible()
+        # устанавливаем 60 fps
+        clock.tick(60)
+
+
 # TODO основная функция игры
 def main_runner():
     global running
@@ -393,7 +426,7 @@ def main_runner():
                 cursor.rect.topleft = event.pos
 
         # задаём задний фон
-        bg = pygame.image.load('data\\bg3.png')
+        bg = load_image('bg3.png')
         screen.blit(bg, (0, 0))
 
         # отрисовываем секундомер
@@ -480,6 +513,9 @@ def level1():
         Border(5, 5, 5, HEIGHT - 5)
         Border(WIDTH - 5, 5, WIDTH - 5, HEIGHT - 5)
 
+        # вызываем отчет времени
+        time_report()
+
         if not main_runner():
             show_menu()
 
@@ -528,6 +564,9 @@ def level2():
         Border(5, HEIGHT - 5, WIDTH - 5, HEIGHT - 5)
         Border(5, 5, 5, HEIGHT - 5)
         Border(WIDTH - 5, 5, WIDTH - 5, HEIGHT - 5)
+
+        # вызываем отчет времени
+        time_report()
 
         if not main_runner():
             show_menu()
@@ -578,6 +617,9 @@ def level3():
         Border(5, HEIGHT - 5, WIDTH - 5, HEIGHT - 5)
         Border(5, 5, 5, HEIGHT - 5)
         Border(WIDTH - 5, 5, WIDTH - 5, HEIGHT - 5)
+
+        # вызываем отчет времени
+        time_report()
 
         if not main_runner():
             show_menu()
